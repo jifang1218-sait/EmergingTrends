@@ -11,6 +11,15 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+# jifang -- begin
+set(CMAKE_PREFIX_PATH "/home/jifang/apps/Qt5/5.14.2")
+set(QT_DIR "/home/jifang/apps/Qt5/5.14.2/gcc_64/lib/cmake/Qt5")
+set(Qt5_DIR "/home/jifang/apps/Qt5/5.14.2/gcc_64/lib/cmake/Qt5")
+set(YOUR_DIRECTORY
+"/home/jifang/apps/Qt5/5.14.2/gcc_64/include"
+)
+# jifang -- end
+
 # QtCreator supports the following variables for Android, which are identical to qmake Android variables.
 # Check https://doc.qt.io/qt/deployment-android.html for more information.
 # They need to be set before the find_package( ...) calls below.
@@ -24,7 +33,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 #    endif()
 #endif()
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
+#find_package(QT NAMES Qt6 Qt5 COMPONENTS Widgets REQUIRED)
+find_package(QT NAMES Qt5 COMPONENTS Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Widgets REQUIRED)
 
 set(PROJECT_SOURCES
@@ -49,4 +59,5 @@ else()
     endif()
 endif()
 
+target_include_directories(demo PRIVATE ${YOUR_DIRECTORY}) # jifang
 target_link_libraries(demo PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
