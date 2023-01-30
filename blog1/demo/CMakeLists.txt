@@ -6,6 +6,8 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+add_definitions(-DDEBUG=1 -D_DEBUG=1)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -16,6 +18,8 @@ set(PROJECT_SOURCES
         main.cpp
         mainwindow.cpp
         mainwindow.h
+		WeatherManager.h
+		WeatherManager.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

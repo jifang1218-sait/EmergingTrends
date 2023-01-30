@@ -12,6 +12,12 @@ class MainWindow : public QMainWindow
 private:
 	QWidget *central;
 
+public slots:
+	void updateClicked();
+	void prevClicked();
+	void nextClicked();
+	void todayClicked();
+
 public:
 	void constructUI(QWidget *parent);
 	QTableView *createTable();

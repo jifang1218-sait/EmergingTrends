@@ -8,11 +8,19 @@
 #include <QHeaderView>
 #include <vector>
 #include <string>
+#include "WeatherManager.h"
+
+#if DEBUG
+#include <iostream>
+using namespace std;
+#endif
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), central(NULL)
 {
 	constructUI(parent);
+	WeatherManager *mgr = WeatherManager::GetInstance();
+	mgr->FetchWeather();
 }
 
 MainWindow::~MainWindow()
@@ -22,18 +30,52 @@ MainWindow::~MainWindow()
 void MainWindow::constructUI(QWidget *parent) {
 	central = new QWidget(parent);
 
-	QVBoxLayout *vlayout = new QVBoxLayout();
-	QTableView *table = createTable();
-	vlayout->addWidget(table, 1);
-
+	// main horizontal layout
 	QHBoxLayout *hlayout = new QHBoxLayout();
-	hlayout->addStretch();
-	QPushButton *button = new QPushButton("Update");
-	hlayout->addWidget(button);
-	hlayout->addStretch();
 
-	vlayout->addLayout(hlayout);
-	central->setLayout(vlayout);
+	// left button group layout
+	QVBoxLayout *leftLayout = new QVBoxLayout();
+	leftLayout->addStretch();
+	
+	// prev button
+	QPushButton *prev = new QPushButton("Prev");
+	connect(prev, SIGNAL(clicked()), this, SLOT(prevClicked()));
+	leftLayout->addWidget(prev);
+
+	leftLayout->addStretch();
+
+	// today button
+	QPushButton *today = new QPushButton("Today");
+	connect(today, SIGNAL(clicked()), this, SLOT(todayClicked()));
+	leftLayout->addWidget(today);
+
+	leftLayout->addStretch();
+
+	// next button
+	QPushButton *next = new QPushButton("Next");
+	connect(next, SIGNAL(clicked()), this, SLOT(nextClicked()));
+	leftLayout->addWidget(next);
+
+	leftLayout->addStretch();
+	hlayout->addLayout(leftLayout);
+
+	QVBoxLayout *rightLayout = new QVBoxLayout();
+	QTableView *table = createTable();
+	rightLayout->addWidget(table, 1);
+
+	// bottom layout (update button).
+	QHBoxLayout *bottomLayout = new QHBoxLayout();
+	bottomLayout->addStretch();
+
+	QPushButton *button = new QPushButton("Update");
+	connect(button, SIGNAL(clicked()), this, SLOT(updateClicked()));
+	bottomLayout->addWidget(button);
+	
+	bottomLayout->addStretch();
+	rightLayout->addLayout(bottomLayout);
+	hlayout->addLayout(rightLayout);
+
+	central->setLayout(hlayout);
 	setCentralWidget(central);
 }
 
@@ -52,12 +94,16 @@ QTableView *MainWindow::createTable() {
 
 	// fill data
 	QStandardItem *item = new QStandardItem("aaa");
+	item->setTextAlignment(Qt::AlignCenter);
 	model->setItem(0, 0, item);
 	item = new QStandardItem("bbb");
+	item->setTextAlignment(Qt::AlignCenter);
 	model->setItem(0, 1, item);
 	item = new QStandardItem("aaa");
+	item->setTextAlignment(Qt::AlignCenter);
 	model->setItem(1, 0, item);
 	item = new QStandardItem("bbb");
+	item->setTextAlignment(Qt::AlignCenter);
 	model->setItem(1, 1, item);
 
 	ret->setModel(model);
@@ -69,10 +115,42 @@ QTableView *MainWindow::createTable() {
 	ret->verticalHeader()->hide();
 
 	// set table attributes:
-	// no edit
+	// column select, no edit, 
 	ret->setSelectionBehavior(QAbstractItemView::SelectColumns);
 	ret->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	return ret;
+}
+
+void MainWindow::prevClicked() {
+#if DEBUG
+	cout<<"prev clicked."<<endl;
+#endif
+	WeatherManager *mgr = WeatherManager::GetInstance();
+	mgr->PrevDay();
+}
+
+void MainWindow::todayClicked() {
+#if DEBUG
+	cout<<"today clicked."<<endl;
+#endif
+	WeatherManager *mgr = WeatherManager::GetInstance();
+	mgr->Today();
+}
+
+void MainWindow::nextClicked() {
+#if DEBUG
+	cout<<"next clicked."<<endl;
+#endif
+	WeatherManager *mgr = WeatherManager::GetInstance();
+	mgr->NextDay();
+}
+
+void MainWindow::updateClicked() {
+#if DEBUG
+	cout<<"update clicked."<<endl;
+#endif
+	WeatherManager *mgr = WeatherManager::GetInstance();
+	mgr->FetchWeather();
 }
 
