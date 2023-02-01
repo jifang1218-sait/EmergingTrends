@@ -2,17 +2,33 @@ cmake_minimum_required(VERSION 3.5)
 
 project(demo VERSION 0.1 LANGUAGES CXX)
 
+set(CMAKE_PREFIX_PATH $ENV{QT_HOME})
+
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-add_definitions(-DDEBUG=1 -D_DEBUG=1)
+add_definitions(-DDEBUG=1 -D_DEBUG=1 -D_SYNCHRONIZED_=1)
+set(CMAKE_BUILD_TYPE Debug)
+set(EXECUTABLE_NAME "demo")
+set(VERSION_MAJOR 0)
+set(VERSION_MINOR 1)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS 
+	Core
+	Widgets
+	Network
+	)
+find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS 
+	Core
+	Widgets
+	Network
+	)
+
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -45,7 +61,11 @@ else()
     endif()
 endif()
 
-target_link_libraries(demo PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(demo PRIVATE 
+	Qt${QT_VERSION_MAJOR}::Core
+	Qt${QT_VERSION_MAJOR}::Widgets
+	Qt${QT_VERSION_MAJOR}::Network
+	)
 
 set_target_properties(demo PROPERTIES
     MACOSX_BUNDLE_GUI_IDENTIFIER my.example.com

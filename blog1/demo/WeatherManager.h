@@ -1,9 +1,16 @@
 #ifndef WEATHER_MANAGER_H_
 #define WEATHER_MANAGER_H_
 
-class WeatherManager {
+#include <QObject>
+
+class QNetworkReply;
+class QNetworkAccessManager;
+class WeatherManager : public QObject {
+	Q_OBJECT
 	private:
 		static WeatherManager *mgr;
+		QNetworkAccessManager *naMgr;
+
 	private:
 		WeatherManager();
 		WeatherManager(const WeatherManager&) = delete;
@@ -22,6 +29,9 @@ class WeatherManager {
 		void PrevDay();
 		void NextDay();
 		void Today();
+
+	public slots:
+		void requestFinished(QNetworkReply *reply);
 };
 
 

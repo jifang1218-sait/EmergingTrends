@@ -8,12 +8,8 @@
 #include <QHeaderView>
 #include <vector>
 #include <string>
+#include <QDebug>
 #include "WeatherManager.h"
-
-#if DEBUG
-#include <iostream>
-using namespace std;
-#endif
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), central(NULL)
@@ -124,7 +120,7 @@ QTableView *MainWindow::createTable() {
 
 void MainWindow::prevClicked() {
 #if DEBUG
-	cout<<"prev clicked."<<endl;
+	qDebug()<<"prev clicked.";
 #endif
 	WeatherManager *mgr = WeatherManager::GetInstance();
 	mgr->PrevDay();
@@ -132,7 +128,7 @@ void MainWindow::prevClicked() {
 
 void MainWindow::todayClicked() {
 #if DEBUG
-	cout<<"today clicked."<<endl;
+	qDebug()<<"today clicked.";
 #endif
 	WeatherManager *mgr = WeatherManager::GetInstance();
 	mgr->Today();
@@ -140,7 +136,7 @@ void MainWindow::todayClicked() {
 
 void MainWindow::nextClicked() {
 #if DEBUG
-	cout<<"next clicked."<<endl;
+	qDebug()<<"next clicked.";
 #endif
 	WeatherManager *mgr = WeatherManager::GetInstance();
 	mgr->NextDay();
@@ -148,7 +144,7 @@ void MainWindow::nextClicked() {
 
 void MainWindow::updateClicked() {
 #if DEBUG
-	cout<<"update clicked."<<endl;
+	qDebug()<<"update clicked.";
 #endif
 	WeatherManager *mgr = WeatherManager::GetInstance();
 	mgr->FetchWeather();

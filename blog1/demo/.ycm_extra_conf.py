@@ -38,9 +38,13 @@ flags = [
 '-isystem',
 '/home/jifang/apps/Qt5/sdk/include',
 '-isystem',
+'/home/jifang/apps/Qt5/sdk/include/QtCore',
+'-isystem',
 '/home/jifang/apps/Qt5/sdk/include/QtWidgets',
 '-isystem',
 '/home/jifang/apps/Qt5/sdk/include/QtGui',
+'-isystem',
+'/home/jifang/apps/Qt5/sdk/include/QtNetwork',
 ]
 
 
