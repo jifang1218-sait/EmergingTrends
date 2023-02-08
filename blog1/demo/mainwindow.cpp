@@ -1,4 +1,11 @@
 #include "mainwindow.h"
+#include "WeatherManager.h"
+
+#if _USE_CUSTOMIZED_THREAD
+	#include "WorkerThread.h"
+	#include <QMetaObject>
+#endif
+
 #include <QLabel>
 #include <QPushButton>
 #include <QHBoxLayout>
@@ -9,7 +16,6 @@
 #include <QList>
 #include <QString>
 #include <QDebug>
-#include "WeatherManager.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent), central(NULL), model(NULL)
@@ -17,7 +23,14 @@ MainWindow::MainWindow(QWidget *parent)
 	constructUI(parent);
 	WeatherManager *mgr = WeatherManager::GetInstance();
 	mgr->addObserver(this);
+	
+#if !_USE_CUSTOMIZED_THREAD
 	mgr->FetchWeather();
+#else
+	// create a worker thread. it is used to fetch weather data.
+	workerThread = new WorkerThread(this);
+	workerThread->start();
+#endif
 }
 
 MainWindow::~MainWindow()
@@ -165,12 +178,32 @@ void MainWindow::updateClicked() {
 #if DEBUG
 	qDebug()<<"update clicked.";
 #endif
+
+#if !_USE_CUSTOMIZED_THREAD
 	WeatherManager *mgr = WeatherManager::GetInstance();
 	mgr->FetchWeather();
+#else
+	if (workerThread->isFinished()) {
+		workerThread->start();
+	}
+#endif
 }
 
 void MainWindow::UpdateWeatherInfo(const QString &city, const QString &condition, 
 		const QString &temperature, const QString &humidity, const QString &windSpeed) {
+#if !_USE_CUSTOMIZED_THREAD
+	// as we are in ui thread(qt internally switched to ui thread.
+	// we can update ui directly. 
 	fillWeatherData(city, condition, temperature, humidity, windSpeed);
+#else 
+	// as we are in our own work thread, so we have to switch to main thread to update ui. 
+	// we use signal-slot mechanism as a bridge to switch to ui thread. 
+	QMetaObject::invokeMethod(this, "fillWeatherData", 
+			Q_ARG(const QString&, city), 
+			Q_ARG(const QString&, condition), 
+			Q_ARG(const QString&, temperature), 
+			Q_ARG(const QString&, humidity), 
+			Q_ARG(const QString&, windSpeed));
+#endif
 }
 

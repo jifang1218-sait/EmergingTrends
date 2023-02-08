@@ -8,7 +8,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-add_definitions(-DDEBUG=1 -D_DEBUG=1 -D_SYNCHRONIZED_=1)
+add_definitions(-DDEBUG=1 -D_DEBUG=1 -D_USE_CUSTOMIZED_THREAD=1)
 set(CMAKE_BUILD_TYPE Debug)
 set(EXECUTABLE_NAME "demo")
 set(VERSION_MAJOR 0)
@@ -39,6 +39,8 @@ set(PROJECT_SOURCES
 		WeatherManagerCallbacks.h
 		HourItem.h
 		HourItem.cpp
+		WorkerThread.h
+		WorkerThread.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

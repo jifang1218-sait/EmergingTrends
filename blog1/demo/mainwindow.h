@@ -8,6 +8,11 @@ class QWidget;
 class QTableView;
 class QStandardItemModel;
 class QString;
+
+#if _USE_CUSTOMIZED_THREAD
+	class WorkerThread;
+#endif
+
 class MainWindow : public QMainWindow, public WeatherInfoCallback
 {
     Q_OBJECT
@@ -15,6 +20,9 @@ class MainWindow : public QMainWindow, public WeatherInfoCallback
 private:
 	QStandardItemModel *model;
 	QWidget *central;
+#if _USE_CUSTOMIZED_THREAD
+	WorkerThread *workerThread;
+#endif
 
 public slots:
 	void updateClicked();
@@ -22,12 +30,17 @@ public slots:
 	void nextClicked();
 	void todayClicked();
 
+#if !_USE_CUSTOMIZED_THREAD
 private:
+#endif
+	
 	void fillWeatherData(const QString &city, 
 			const QString &condition, 
 			const QString &temperature, 
 			const QString &humidity, 
 			const QString &windSpeed);
+
+private:
 	void constructUI(QWidget *parent);
 	QTableView *createTable();
 

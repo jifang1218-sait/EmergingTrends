@@ -1,15 +1,16 @@
 #include "WeatherManager.h"
 #include "HourItem.h"
+#include "WeatherManagerCallbacks.h"
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QUrlQuery>
 #include <QEventLoop>
 #include <QDebug>
+#include <QThread>
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QJsonArray>
-#include "WeatherManagerCallbacks.h"
 
 WeatherManager *WeatherManager::mgr = NULL;
 
@@ -46,6 +47,7 @@ void WeatherManager::FetchWeather() {
 
 	QUrl url("https://api.met.no/weatherapi/locationforecast/2.0/compact");
 	QUrlQuery query;
+	// hardcode calgary location
 	query.addQueryItem("lat", "50.9804");
 	query.addQueryItem("lon", "-114.1015");
 	url.setQuery(query);
@@ -73,11 +75,30 @@ void WeatherManager::FetchWeather() {
 	qDebug()<<url.url();
 	req.setUrl(url);
 
-#if !_SYNCHRONIZED_
+#if !_USE_CUSTOMIZED_THREAD
+	// this line will use Qt's asynchronous mechanism,
+	// WeatherManager::requestFinished will be invoked in a sub thread. 
 	QNetworkReply *reply = naMgr->get(req);
 #else
 	// code below will make the request synchronously in this thread.
-	QNetworkAccessManager *synchronizedMgr = new QNetworkAccessManager(this);
+	// WeatherManager::requestFinished will run in the same thread.
+	// as the ui will be blocked by the task, so we use our user-customized thread, 
+	// workerThread to run WeatherManager::FetchWeather. 
+	
+	// in order to demonstrate worker thread more clearly, we delay 10 seconds.
+	QThread::msleep(10000);
+
+	// as now we are in worker thread, QNetworkAccessManager will be created in worker thread. 
+	// "this"(WeatherManager) is created in ui thread, 
+	// so we can't set "this" as the parent object of network access manager. 
+	// to resolve the problem, we have 2 ways:
+	// 1. switch to ui thread;
+	// 2. simply pass NULL to network access manager. we choose 2. 
+	QNetworkAccessManager *synchronizedMgr = new QNetworkAccessManager(NULL);
+
+	// we use a local event loop to make QNetworkAccessManager::get() synchronize, 
+	// otherwise it is asynchronized. 
+	// in practice, we don't have to do so, here we use the trick to demonstrate the usage of thread.
 	QEventLoop eventLoop;
 	QObject::connect(synchronizedMgr, SIGNAL(finished(QNetworkReply *)), &eventLoop, SLOT(quit()));
 	QNetworkReply *reply = synchronizedMgr->get(req);

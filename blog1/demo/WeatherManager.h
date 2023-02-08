@@ -9,6 +9,7 @@ class QNetworkReply;
 class QNetworkAccessManager;
 class QByteArray;
 class WeatherInfoCallback;
+
 class WeatherManager : public QObject {
 	Q_OBJECT
 	private:
