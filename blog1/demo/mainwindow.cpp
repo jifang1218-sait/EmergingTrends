@@ -6,16 +6,17 @@
 #include <QTableView>
 #include <QStandardItemModel>
 #include <QHeaderView>
-#include <vector>
-#include <string>
+#include <QList>
+#include <QString>
 #include <QDebug>
 #include "WeatherManager.h"
 
 MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent), central(NULL)
+    : QMainWindow(parent), central(NULL), model(NULL)
 {
 	constructUI(parent);
 	WeatherManager *mgr = WeatherManager::GetInstance();
+	mgr->addObserver(this);
 	mgr->FetchWeather();
 }
 
@@ -32,7 +33,7 @@ void MainWindow::constructUI(QWidget *parent) {
 	// left button group layout
 	QVBoxLayout *leftLayout = new QVBoxLayout();
 	leftLayout->addStretch();
-	
+/*	
 	// prev button
 	QPushButton *prev = new QPushButton("Prev");
 	connect(prev, SIGNAL(clicked()), this, SLOT(prevClicked()));
@@ -52,7 +53,7 @@ void MainWindow::constructUI(QWidget *parent) {
 	connect(next, SIGNAL(clicked()), this, SLOT(nextClicked()));
 	leftLayout->addWidget(next);
 
-	leftLayout->addStretch();
+	leftLayout->addStretch();*/
 	hlayout->addLayout(leftLayout);
 
 	QVBoxLayout *rightLayout = new QVBoxLayout();
@@ -79,29 +80,27 @@ QTableView *MainWindow::createTable() {
 	using namespace std;
 
 	QTableView *ret = new QTableView();
-	QStandardItemModel *model = new QStandardItemModel();
+	model = new QStandardItemModel();
 
 	// add header
-	vector<string> days{"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
+	QList<QString> days{"City", "Condition", "Temperature", "Humidity", "Wind Speed"};
 	model->setColumnCount(days.size());
 	for (int i=0; i<days.size(); ++i) {
-		model->setHeaderData(i, Qt::Horizontal, days[i].c_str());
+		model->setHeaderData(i, Qt::Horizontal, days[i]);
 	}
 
-	// fill data
-	QStandardItem *item = new QStandardItem("aaa");
-	item->setTextAlignment(Qt::AlignCenter);
-	model->setItem(0, 0, item);
-	item = new QStandardItem("bbb");
-	item->setTextAlignment(Qt::AlignCenter);
-	model->setItem(0, 1, item);
-	item = new QStandardItem("aaa");
-	item->setTextAlignment(Qt::AlignCenter);
-	model->setItem(1, 0, item);
-	item = new QStandardItem("bbb");
-	item->setTextAlignment(Qt::AlignCenter);
-	model->setItem(1, 1, item);
+	// set column width
+	for (int col=0; col<model->columnCount(); ++col) {
+		   ret->setColumnWidth(col,200);
+	}
 
+	// set row height
+	for (int row=0; row<10; ++row) {
+		ret->setRowHeight(row, 200);
+	}
+
+	// fill data, N/A by default, will refresh after getting the data.
+	fillWeatherData("Calgary", "N/A", "N/A", "N/A", "N/A");
 	ret->setModel(model);
 
 	// set table style:
@@ -116,6 +115,26 @@ QTableView *MainWindow::createTable() {
 	ret->setEditTriggers(QAbstractItemView::NoEditTriggers);
 
 	return ret;
+}
+
+void MainWindow::fillWeatherData(const QString &city, 
+		const QString &condition, const QString &temperature, 
+		const QString &humidity, const QString &windSpeed) {
+	QStandardItem *item = new QStandardItem(city);
+	item->setTextAlignment(Qt::AlignCenter);
+	model->setItem(0, 0, item); // city
+	item = new QStandardItem(condition);
+	item->setTextAlignment(Qt::AlignCenter);
+	model->setItem(0, 1, item); // condition
+	item = new QStandardItem(temperature);
+	item->setTextAlignment(Qt::AlignCenter);
+	model->setItem(0, 2, item); // temperature
+	item = new QStandardItem(humidity);
+	item->setTextAlignment(Qt::AlignCenter);
+	model->setItem(0, 3, item); // humidity
+	item = new QStandardItem(windSpeed);
+	item->setTextAlignment(Qt::AlignCenter);
+	model->setItem(0, 4, item); // wind speed
 }
 
 void MainWindow::prevClicked() {
@@ -148,5 +167,10 @@ void MainWindow::updateClicked() {
 #endif
 	WeatherManager *mgr = WeatherManager::GetInstance();
 	mgr->FetchWeather();
+}
+
+void MainWindow::UpdateWeatherInfo(const QString &city, const QString &condition, 
+		const QString &temperature, const QString &humidity, const QString &windSpeed) {
+	fillWeatherData(city, condition, temperature, humidity, windSpeed);
 }
 

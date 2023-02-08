@@ -1,10 +1,15 @@
 #include "WeatherManager.h"
+#include "HourItem.h"
 #include <QNetworkRequest>
 #include <QNetworkReply>
 #include <QNetworkAccessManager>
 #include <QUrlQuery>
 #include <QEventLoop>
 #include <QDebug>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include "WeatherManagerCallbacks.h"
 
 WeatherManager *WeatherManager::mgr = NULL;
 
@@ -17,6 +22,16 @@ WeatherManager::WeatherManager() {
 WeatherManager::~WeatherManager() {
 }
 
+void WeatherManager::addObserver(WeatherInfoCallback *observer) {
+	if (observer == NULL) {
+		return;
+	}
+
+	if (!callbacks.contains(observer)) {
+		callbacks.append(observer);
+	}
+}
+
 WeatherManager *WeatherManager::GetInstance() {
 	if (mgr == NULL) {
 		mgr = new WeatherManager();
@@ -24,9 +39,6 @@ WeatherManager *WeatherManager::GetInstance() {
 
 	return mgr;
 }
-
-
-
 
 void WeatherManager::FetchWeather() {
 
@@ -89,8 +101,53 @@ void WeatherManager::requestFinished(QNetworkReply *reply) {
 	if (err != QNetworkReply::NoError) {
 		qDebug()<<"Failed:"<<reply->errorString();
 	} else {
-		qDebug()<<reply->readAll();
+		QList<HourItem> items = parseWeatherData(reply->readAll());
+		const HourItem &item = items[0];
+		// broadcast
+		for (QList<WeatherInfoCallback *>::iterator pos=callbacks.begin(); 
+				pos!=callbacks.end(); ++pos) {
+			(*pos)->UpdateWeatherInfo("Calgary", 
+					item.GetWeatherCondition(), QString::number(item.GetTemperature()), 
+					QString::number(item.GetHumidity()), QString::number(item.GetWindSpeed()));
+		}
 	}
+}
+
+QList<HourItem> WeatherManager::parseWeatherData(const QByteArray &jsonData) {
+	QList<HourItem> hourItems;
+	QJsonParseError err_rpt;
+	QJsonDocument  root_Doc = QJsonDocument::fromJson(jsonData, &err_rpt);
+	if(err_rpt.error != QJsonParseError::NoError) {
+		qDebug() << "Invalid Json format.";
+		return hourItems;
+	} else { // parse json.
+		QJsonObject root_Obj = root_Doc.object();
+		QJsonObject node = root_Obj.value("properties").toObject();
+		QJsonValue value = node.value("timeseries");
+		if (value.isArray()) {
+			QJsonArray arr = value.toArray();
+			for (int i=0; i<arr.size(); ++i) {
+				QJsonObject objRoot = arr[i].toObject();
+				QString time = objRoot["time"].toString();
+				// data->instant->details
+				QJsonObject obj = objRoot["data"].toObject()["instant"]
+					.toObject()["details"]
+					.toObject();
+				double temperature = obj["air_temperature"].toDouble();
+				double humidity = obj["relative_humidity"].toDouble();
+				double windSpeed = obj["wind_speed"].toDouble();
+
+				// data->next_1_hours->summary->symbol_code
+				QString weatherCondition = objRoot["data"].toObject()["next_1_hours"]
+					.toObject()["summary"]
+					.toObject()["symbol_code"].toString();
+				HourItem item(time, temperature, humidity, windSpeed, weatherCondition);
+				hourItems.append(item);
+			}
+		}
+	}
+
+	return hourItems;
 }
 
 void WeatherManager::PrevDay() {

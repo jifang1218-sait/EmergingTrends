@@ -36,6 +36,9 @@ set(PROJECT_SOURCES
         mainwindow.h
 		WeatherManager.h
 		WeatherManager.cpp
+		WeatherManagerCallbacks.h
+		HourItem.h
+		HourItem.cpp
 )
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
