@@ -4,16 +4,16 @@
             "name": "Linux",
             "includePath": [
                 "${workspaceFolder}/**",
-                "/home/jifang/apps/Qt5/sdk/include/**",
-                "/home/jifang/apps/Qt5/sdk/include/QtWidgets", 
-                "/home/jifang/apps/Qt5/sdk/include/QtCore", 
-                "/home/jifang/apps/Qt5/sdk/include/QtNetwork", 
+                "/home/jifang/apps/Qt5/sdk/include",
+                "/home/jifang/apps/Qt5/sdk/include/QtWidgets",
+                "/home/jifang/apps/Qt5/sdk/include/QtCore",
+                "/home/jifang/apps/Qt5/sdk/include/QtNetwork",
                 "/home/jifang/apps/Qt5/sdk/include/QtGui"
             ],
             "compilerPath": "/usr/bin/g++",
             "cStandard": "c17",
             "cppStandard": "c++17",
-            "configurationProvider": "ms-vscode.cmake-tools"
+            "compileCommands": "${workspaceFolder}/build/compile_commands.json"
         }
     ],
     "version": 4

@@ -26,9 +26,6 @@ private:
 
 public slots:
 	void updateClicked();
-	void prevClicked();
-	void nextClicked();
-	void todayClicked();
 
 #if !_USE_CUSTOMIZED_THREAD
 private:
@@ -42,7 +39,7 @@ private:
 
 private:
 	void constructUI(QWidget *parent);
-	QTableView *createTable();
+	QTableView *createTable(QWidget *parent);
 
 public:
     MainWindow(QWidget *parent = nullptr);
